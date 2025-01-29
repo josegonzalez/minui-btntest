@@ -20,7 +20,7 @@ Input device event monitor and query tool for devices that support MinUI
 ### Synopsis
 
 ```shell
-evtest <mode> <state> <combination> [<button,>...]
+minui-btntest <mode> <state> <combination> [<button,>...]
 ```
 
 ### Modes
