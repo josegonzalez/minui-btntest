@@ -15,8 +15,6 @@
 #include "api.h"
 #include "utils.h"
 
-FILE *log_file = NULL;
-
 // log_error logs a message to stderr for debugging purposes
 void log_error(const char *msg)
 {
@@ -333,7 +331,7 @@ void handle_input(struct AppState *state)
 
 void usage(char *argv[])
 {
-    printf("usage: %s <event_type> <combination> [<buttons>]\n", argv[0]);
+    printf("usage: %s <mode> <state> <combination> [<buttons>]\n", argv[0]);
 }
 
 bool is_valid_button(char *button)
