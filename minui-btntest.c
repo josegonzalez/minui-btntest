@@ -518,6 +518,30 @@ void signal_handler(int signal)
     }
 }
 
+// init initializes the app state
+// everything is placed here as MinUI sometimes logs to stdout
+// and the logging happens depending on the platform
+void init()
+{
+    // set the cpu speed to the menu speed
+    // this is done here to ensure we downclock
+    // the menu (no need to draw power unnecessarily)
+    PWR_setCPUSpeed(CPU_SPEED_MENU);
+
+    // initialize:
+    // - input from the pad/joystick/buttons/etc.
+    // - sync hardware settings (brightness, hdmi, speaker, etc.)
+    PAD_init();
+    InitSettings();
+}
+
+// destruct cleans up the app state in reverse order
+void destruct()
+{
+    QuitSettings();
+    PAD_quit();
+}
+
 // main is the entry point for the app
 int main(int argc, char *argv[])
 {
@@ -537,11 +561,9 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // initialize:
-    // - input from the pad/joystick/buttons/etc.
-    // - sync hardware settings (brightness, hdmi, speaker, etc.)
-    PAD_init();
-    swallow_stdout_from_function(InitSettings);
+    // swallow all stdout from init calls
+    // MinUI will sometimes randomly log to stdout
+    swallow_stdout_from_function(init);
 
     signal(SIGINT, signal_handler);
 
@@ -550,8 +572,7 @@ int main(int argc, char *argv[])
         handle_input(&state);
     }
 
-    QuitSettings();
-    PAD_quit();
+    swallow_stdout_from_function(destruct);
 
     return state.exit_code;
 }
