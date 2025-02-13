@@ -526,6 +526,14 @@ void init()
     // the menu (no need to draw power unnecessarily)
     PWR_setCPUSpeed(CPU_SPEED_MENU);
 
+#ifdef is_brick
+    char *device = getenv("DEVICE");
+    if (exactMatch("brick", device))
+    {
+        is_brick = exactMatch("brick", device);
+    }
+#endif
+
     // initialize:
     // - input from the pad/joystick/buttons/etc.
     // - sync hardware settings (brightness, hdmi, speaker, etc.)
