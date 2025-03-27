@@ -15,6 +15,23 @@
 #include "api.h"
 #include "utils.h"
 
+enum list_result_t
+{
+    ExitCodeSuccess = 0,
+    ExitCodeError = 1,
+    ExitCodeCancelButton = 2,
+    ExitCodeMenuButton = 3,
+    ExitCodeActionButton = 4,
+    ExitCodeInactionButton = 5,
+    ExitCodeStartButton = 6,
+    ExitCodeParseError = 10,
+    ExitCodeSerializeError = 11,
+    ExitCodeTimeout = 124,
+    ExitCodeKeyboardInterrupt = 130,
+    ExitCodeSigterm = 143,
+};
+typedef int ExitCode;
+
 // log_error logs a message to stderr for debugging purposes
 void log_error(const char *msg)
 {
@@ -317,14 +334,14 @@ void handle_input(struct AppState *state)
     if (result)
     {
         state->quitting = 1;
-        state->exit_code = EXIT_SUCCESS;
+        state->exit_code = ExitCodeSuccess;
         return;
     }
 
     if (state->button.mode == MODE_CAPTURE)
     {
         state->quitting = 1;
-        state->exit_code = EXIT_FAILURE;
+        state->exit_code = ExitCodeError;
         return;
     }
 }
@@ -384,12 +401,12 @@ int parse_args(struct AppState *state, int argc, char *argv[])
             char buff[256];
             sprintf(buff, "invalid mode: %s", argv[1]);
             log_error(buff);
-            return EXIT_FAILURE;
+            return ExitCodeParseError;
         }
     }
     else
     {
-        return EXIT_FAILURE;
+        return ExitCodeParseError;
     }
 
     if (argc > 2)
@@ -415,12 +432,12 @@ int parse_args(struct AppState *state, int argc, char *argv[])
             char buff[256];
             sprintf(buff, "invalid event type: %s", argv[2]);
             log_error(buff);
-            return EXIT_FAILURE;
+            return ExitCodeParseError;
         }
     }
     else
     {
-        return EXIT_FAILURE;
+        return ExitCodeParseError;
     }
 
     if (argc > 3)
@@ -442,12 +459,12 @@ int parse_args(struct AppState *state, int argc, char *argv[])
             char buff[256];
             sprintf(buff, "invalid combination: %s", argv[3]);
             log_error(buff);
-            return EXIT_FAILURE;
+            return ExitCodeParseError;
         }
     }
     else
     {
-        return EXIT_FAILURE;
+        return ExitCodeParseError;
     }
 
     if (argc > 4)
@@ -461,7 +478,7 @@ int parse_args(struct AppState *state, int argc, char *argv[])
                 char buff[256];
                 sprintf(buff, "invalid button: %s", buttons);
                 log_error(buff);
-                return EXIT_FAILURE;
+                return ExitCodeParseError;
             }
 
             state->button.buttons[i] = buttons;
@@ -482,7 +499,7 @@ int parse_args(struct AppState *state, int argc, char *argv[])
         }
     }
 
-    return EXIT_SUCCESS;
+    return ExitCodeSuccess;
 }
 
 // suppress_output suppresses stdout and stderr
@@ -534,11 +551,15 @@ void signal_handler(int signal)
     // if the signal is a ctrl+c, exit with code 130
     if (signal == SIGINT)
     {
-        exit(130);
+        exit(ExitCodeKeyboardInterrupt);
+    }
+    else if (signal == SIGTERM)
+    {
+        exit(ExitCodeSigterm);
     }
     else
     {
-        exit(1);
+        exit(ExitCodeError);
     }
 }
 
@@ -580,17 +601,17 @@ int main(int argc, char *argv[])
     char *buttons[30] = {NULL};
     struct AppState state = {
         .quitting = 0,
-        .exit_code = EXIT_FAILURE,
+        .exit_code = ExitCodeError,
         .button = {
             .combination = BTN_COMBO_ALL,
             .state = STATE_JUST_PRESSED,
             .mode = MODE_CAPTURE,
             .buttons = *buttons}};
 
-    if (parse_args(&state, argc, argv) != EXIT_SUCCESS)
+    if (parse_args(&state, argc, argv) != ExitCodeSuccess)
     {
         usage(argv);
-        return EXIT_FAILURE;
+        return ExitCodeParseError;
     }
 
     // swallow all stdout from init calls
@@ -598,6 +619,7 @@ int main(int argc, char *argv[])
     swallow_stdout_from_function(init);
 
     signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
 
     while (!state.quitting)
     {
