@@ -624,6 +624,7 @@ int main(int argc, char *argv[])
     while (!state.quitting)
     {
         handle_input(&state);
+        usleep(50000);
     }
 
     swallow_stdout_from_function(destruct);
