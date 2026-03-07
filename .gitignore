@@ -1,7 +1,7 @@
 minui
-include
-lib
-platform
+/include
+/lib
+/platform
 minui-*
 
 !minui-btntest.c
