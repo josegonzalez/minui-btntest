@@ -345,12 +345,10 @@ void init()
     // the menu (no need to draw power unnecessarily)
     PWR_setCPUSpeed(CPU_SPEED_MENU);
 
-#ifdef is_brick
-    char *device = getenv("DEVICE");
-    if (exactMatch("brick", device))
-    {
-        is_brick = exactMatch("brick", device);
-    }
+#ifdef PLATFORM_TG5040
+    // tg5040 covers both the Brick and the Smart Pro. MinUI only sets is_brick in
+    // PLAT_initVideo, which this tool never calls, so without this L3/R3/plus/minus are dropped
+    is_brick = exactMatch("brick", getenv("DEVICE"));
 #endif
 
     // initialize:

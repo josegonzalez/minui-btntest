@@ -85,6 +85,11 @@ else
   else
     CFLAGS = $(ARCH) -fomit-frame-pointer
     CFLAGS += $(INCDIR) -DPLATFORM=\"$(WORKSPACE)\" -DUSE_$(SDL) -Ofast -std=gnu99
+    # tg5040 is shared by the Brick and the Smart Pro, and MinUI only maps the
+    # Brick's L3/R3/plus/minus once it knows it is running on a Brick
+    ifeq ($(WORKSPACE),tg5040)
+      CFLAGS += -DPLATFORM_TG5040
+    endif
   endif
 endif
 
