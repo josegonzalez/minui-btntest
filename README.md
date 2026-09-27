@@ -90,6 +90,9 @@ minui-btntest <mode> <state> <combination> [<button,>...] [-- <command> [<args>.
 - `btn_analog_right` - the Analog Stick Right button
 - `btn_none` - the None button
 
+> [!NOTE]
+> On `tg5040`, `btn_l3`, `btn_r3`, `btn_plus` and `btn_minus` are only detected on the Trimui Brick when the `DEVICE` environment variable is set to `brick`. The MinUI launcher already sets it, so this only matters when running `minui-btntest` outside of MinUI.
+
 ### Examples
 
 In the case where you want to check the current input, you can use the `capture` mode. This will exit 0 if the current input matches what was specified, and 1 otherwise.

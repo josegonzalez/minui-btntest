@@ -113,6 +113,18 @@ mk() { # <VAR> <PLATFORM>
     [[ "$output" != *'-DPLATFORM_NEXTUI'* ]]
 }
 
+@test "tg5040 (MinUI) is flagged so the Brick's L3/R3 are detected" {
+    mk CFLAGS tg5040
+    [[ "$output" == *'-DPLATFORM_TG5040'* ]]
+}
+
+@test "other platforms are not flagged as tg5040" {
+    for platform in rg35xxplus miyoomini tg5050-nextui h700-nextui; do
+        mk CFLAGS "$platform"
+        [[ "$output" != *'-DPLATFORM_TG5040'* ]]
+    done
+}
+
 @test "tg5040 (MinUI) does not compile NextUI config" {
     mk SOURCE tg5040
     [[ "$output" != *'config.c'* ]]
