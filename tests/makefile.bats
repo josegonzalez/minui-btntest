@@ -117,3 +117,17 @@ mk() { # <VAR> <PLATFORM>
     mk SOURCE tg5040
     [[ "$output" != *'config.c'* ]]
 }
+
+# the argument parsing and command runner are compiled on every platform
+
+@test "tg5040 (MinUI) compiles the argument parser and command runner" {
+    mk SOURCE tg5040
+    [[ "$output" == *' args.c '* ]]
+    [[ "$output" == *' command.c '* ]]
+}
+
+@test "tg5050-nextui compiles the argument parser and command runner" {
+    mk SOURCE tg5050-nextui
+    [[ "$output" == *' args.c '* ]]
+    [[ "$output" == *' command.c '* ]]
+}
