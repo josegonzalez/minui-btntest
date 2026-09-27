@@ -34,12 +34,16 @@ jobs:
           - rgb30 # (deprecated)
           # - tg3040 now merged with tg5040, so we can't build it separately
           - tg5040
-          - tg5050
           - trimuismart # (deprecated)
           - zero28
+          # NextUI-only builds
+          - tg5050-nextui
+          - h700-nextui
         include:
-          - toolchain: tg5050
+          - toolchain: tg5050-nextui
             toolchain_repo: LoveRetro/tg5050-toolchain
+          - toolchain: h700-nextui
+            toolchain_repo: LoveRetro/h700-toolchain
 
     steps:
       - name: Checkout
@@ -137,10 +141,23 @@ jobs:
           name: ${{ steps.binary.outputs.filename }}
           path: ${{ steps.binary.outputs.filename }}
 
+  bats:
+    name: bats
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      - name: Run the test suites
+        run: bats tests/
+
   release:
     name: release
     runs-on: ubuntu-24.04-arm
-    needs: [ci, macos]
+    needs: [ci, macos, bats]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
