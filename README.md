@@ -12,6 +12,17 @@ Input device event monitor and query tool for devices that support MinUI
 
 - todo: this is built inside-out. Ideally you can clone this into the MinUI workspace directory and build from there under each toolchain, but instead it gets cloned _into_ a toolchain workspace directory and built from there.
 
+### NextUI builds
+
+`tg5050` and `h700` devices only run NextUI, so their binaries are built against a NextUI toolchain and carry a `-nextui` suffix:
+
+| Platform id     | Upstream repo      | Version (Makefile var)        | Toolchain image                        |
+|-----------------|--------------------|-------------------------------|----------------------------------------|
+| `tg5050-nextui` | `loveRetro/NextUI` | `v6.14.0` (`NEXTUI_VERSION`)  | `savant/minui-toolchain:tg5050-nextui` |
+| `h700-nextui`   | `pvaibhav/NextUI`  | `h700-rc11` (`H700_VERSION`)  | `savant/minui-toolchain:h700-nextui`   |
+
+The binary still reports the bare device (`tg5050`, `h700`) at runtime, so it resolves the same on-card paths as the firmware. Run `make test` to check the per-platform build wiring without a toolchain.
+
 ## Usage
 
 > [!IMPORTANT]
