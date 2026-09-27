@@ -60,13 +60,13 @@ PRODUCT = $(TARGET)
 # macOS-specific configuration
 ifeq ($(PLATFORM),macos)
   INCDIR = -I. -Iplatforms/macos/include/ -Iminui/workspace/all/common/ -Iplatforms/macos/platform/ -Iinclude/ $(SDL_CFLAGS)
-  SOURCE = $(TARGET).c minui/workspace/all/common/scaler.c minui/workspace/all/common/utils.c minui/workspace/all/common/api.c platforms/macos/platform/platform.c
+  SOURCE = $(TARGET).c args.c command.c minui/workspace/all/common/scaler.c minui/workspace/all/common/utils.c minui/workspace/all/common/api.c platforms/macos/platform/platform.c
   CFLAGS = $(ARCH) -fomit-frame-pointer
   CFLAGS += $(INCDIR) -DPLATFORM=\"$(WORKSPACE)\" -DUSE_$(SDL) -O3 -std=gnu99 -Wno-tautological-constant-out-of-range-compare -Wno-asm-operand-widths
   FLAGS = $(LIBS) $(SDL_LIBS) -lpthread -lm -lz
 else
   INCDIR = -I. -Iplatform/$(PLATFORM)/include/ -Iminui/workspace/all/common/ -Iminui/workspace/$(WORKSPACE)/platform/ -Iinclude/
-  SOURCE = $(TARGET).c minui/workspace/all/common/scaler.c minui/workspace/all/common/utils.c minui/workspace/all/common/api.c minui/workspace/$(WORKSPACE)/platform/platform.c
+  SOURCE = $(TARGET).c args.c command.c minui/workspace/all/common/scaler.c minui/workspace/all/common/utils.c minui/workspace/all/common/api.c minui/workspace/$(WORKSPACE)/platform/platform.c
   FLAGS = -L$(LD_LIBRARY_PATH) -ldl -lmsettings $(LIBS) -l$(SDL) -l$(SDL)_image -l$(SDL)_ttf -lpthread -lm -lz
   # NextUI toolchains install libmsettings and the GLES stack to /opt/nextui.
   # api.c resamples audio through libsamplerate on every NextUI target. tg5050

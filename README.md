@@ -21,7 +21,11 @@ Input device event monitor and query tool for devices that support MinUI
 | `tg5050-nextui` | `loveRetro/NextUI` | `v6.14.0` (`NEXTUI_VERSION`)  | `savant/minui-toolchain:tg5050-nextui` |
 | `h700-nextui`   | `pvaibhav/NextUI`  | `h700-rc11` (`H700_VERSION`)  | `savant/minui-toolchain:h700-nextui`   |
 
-The binary still reports the bare device (`tg5050`, `h700`) at runtime, so it resolves the same on-card paths as the firmware. Run `make test` to check the per-platform build wiring without a toolchain.
+The binary still reports the bare device (`tg5050`, `h700`) at runtime, so it resolves the same on-card paths as the firmware.
+
+### Tests
+
+Run `make test` to check the per-platform build wiring as well as argument parsing and command execution. The test suites require `bats` and a host C compiler (`cc`, override with `CC`), but no toolchain.
 
 ## Usage
 
@@ -31,13 +35,14 @@ The binary still reports the bare device (`tg5050`, `h700`) at runtime, so it re
 ### Synopsis
 
 ```shell
-minui-btntest <mode> <state> <combination> [<button,>...]
+minui-btntest <mode> <state> <combination> [<button,>...] [-- <command> [<args>...]]
 ```
 
 ### Modes
 
 - `capture` - capture events from the input device
 - `wait` - wait for events from the input device
+- `watch` - run a command every time the events occur (requires a command)
 
 ### States
 
@@ -112,6 +117,31 @@ minui-btntest wait just_pressed any
 # will wait for either A or B to be pressed
 minui-btntest wait just_pressed either btn_a,btn_b
 ```
+
+### Running a command
+
+A command can be specified after `--`. It is run directly (not through a shell), and its arguments are passed through as-is rather than being uppercased like the rest of the arguments.
+
+- `capture` - if the current input matches, runs the command and exits with its exit code. Otherwise exits 1 without running the command.
+- `wait` - waits for the input to match, runs the command once, and exits with its exit code.
+- `watch` - runs the command every time the input matches until `minui-btntest` receives `SIGINT` or `SIGTERM`. The command's exit code is ignored.
+
+The command runs in the foreground, so input is not checked while it is running. In `watch` mode, any input that occurred while the command was running is discarded once it exits, so a button held through the command must be released and pressed again to trigger the command again.
+
+In `capture` and `wait` modes, if the command cannot be found, `minui-btntest` exits 127. If it cannot be executed, it exits 126. If the command is terminated by a signal, `minui-btntest` exits with 128 plus the signal number. A `SIGINT` or `SIGTERM` received while the command is running is forwarded to the command, and `minui-btntest` exits with 130 or 143 respectively once the command exits.
+
+```shell
+# will take a screenshot every time L1 and R1 are pressed together
+minui-btntest watch just_pressed all btn_l1,btn_r1 -- /path/to/screenshot.sh --format png
+
+# will wait for either A or B to be pressed, then run a command once
+minui-btntest wait just_pressed either btn_a,btn_b -- /path/to/command.sh
+
+# will run a command if Start is currently pressed
+minui-btntest capture is_pressed all btn_start -- /path/to/command.sh
+```
+
+Using `watch` instead of running `minui-btntest wait` in a loop avoids re-initializing the device settings every time the command is run.
 
 In some cases, the `minui-btntest` command will write output to stderr. This is due to linking against the MinUI library for startup/teardown functionality, which may log errors to stderr. To suppress this output, you can redirect stderr to stdout.
 
